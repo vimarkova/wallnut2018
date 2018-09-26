@@ -3,7 +3,6 @@ import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
 class Grid:
-
     def __init__(self, data, spacing):
         if isinstance(data, np.ndarray):
             self.data = np.array(data)
@@ -57,21 +56,18 @@ class Grid:
             return f1
 
 
-if __name__ == '__main__':
-    #Read image
-
+def test_interpolation_1d():
     img = mpimg.imread('./data/googlebuzz-1.png')
     img = np.dot(img[..., :3], [0.33, 0.33, 0.33])
+    t = Grid(img, (1, 1))
+    assert 0.5661764798685909 == t.intensity((-4.5, -2.5))
+    print("test_interpolation_1d passed")
 
-    print(img[2,5])
-    print(img[1,5])
-    t = Grid(img, (1,1))
-    print (t.pixel_to_world((2,5)))
-    print (t.pixel_to_world((1,5)))
-    print(t.world_to_pixel((-4.5, -2.5)))
-
-    print(t.intensity((-4.5, -2.5)))
+if __name__ == '__main__':
+    test_interpolation_1d()
 
    # plt.subplot(111)
    # plt.imshow(np.abs(img), cmap='gray')
    # plt.show()
+
+
