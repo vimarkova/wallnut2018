@@ -32,25 +32,29 @@ class Grid:
     def world_to_pixel(self, x):
         assert isinstance(x, tuple), 'coordinates must be tuple!'
         origin = -(np.array(self.data.shape) - 1.0) * np.array(self.spacing) / 2
-
-        s = np.diag(np.array(self.spacing))
-
-        diagonal = 1.0 / np.diag(np.array(self.spacing)) #problem
+        diagonal = np.diag(1.0 / np.array(self.spacing))
         p = diagonal.dot(x - origin)
         return p
 
     def intensity(self, world_coords):
         p = self.world_to_pixel(world_coords)
 
-        x1 = np.floor(p[0])
-        x2 = np.ceil(p[0])
-        y1 = np.floor(p[1])
-        y2 = np.ceil(p[1])
+        x1 = int(np.floor(p[0]))
+        x2 = int(np.ceil(p[0]))
+        y1 = int(np.floor(p[1]))
+        y2 = int(np.ceil(p[1]))
         # linear interpolation in the x-direction
-        f1 = (x2-p[0])*self.data[x1,y1] + (p[0]-x1)*self.data[x2,y1]
-        f2 = (x2-p[0])*self.data[x1,y2] + (p[0]-x1)*self.data[x2,y2]
+        if x1 != x2:
+            f1 = (x2-p[0])*self.data[x1,y1] + (p[0]-x1)*self.data[x2,y1]
+            f2 = (x2-p[0])*self.data[x1,y2] + (p[0]-x1)*self.data[x2,y2]
+        else:
+            f1 = self.data[x1,y1]
+            f2 = self.data[x1,y2]
         # in the y direction
-        return (y2 - p[1])*f1 + (p[1] - y1)*f2
+        if y1 != y2:
+            return (y2 - p[1])*f1 + (p[1] - y1)*f2
+        else:
+            return f1
 
 
 if __name__ == '__main__':
@@ -64,10 +68,9 @@ if __name__ == '__main__':
     t = Grid(img, (1,1))
     print (t.pixel_to_world((2,5)))
     print (t.pixel_to_world((1,5)))
+    print(t.world_to_pixel((-4.5, -2.5)))
 
-    t.world_to_pixel((-4.5, -2.5))
-
-    #t.intensity((-4.5, -2.5))
+    print(t.intensity((-4.5, -2.5)))
 
    # plt.subplot(111)
    # plt.imshow(np.abs(img), cmap='gray')
