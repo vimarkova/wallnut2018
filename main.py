@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import math
+from skimage.transform import resize
 
 class Grid:
     def __init__(self, data, spacing):
@@ -139,7 +140,11 @@ def forward_projection(image, spacing):
 
 
 if __name__ == '__main__':
-    img = mpimg.imread('./data/googlebuzz-1.png')
+    img = mpimg.imread('./data/circle.png')
     img = np.dot(img[..., :3], [0.33, 0.33, 0.33])
+    img = resize(img, (20,20))
+
     t = Grid(img, (1, 1))
-    forward_projection(t, 1.)
+    t.show_img()
+    forward_projection(t, 1)
+    print("done")
