@@ -21,6 +21,11 @@ class Grid:
     def diagonal_length_in_pixels(self):
         return np.sqrt(self.data.shape[0]**2 + self.data.shape[1]**2)
 
+    def diagonal_length_in_world(self):
+        a = pow(self.data.shape[0]*self.spacing[0], 2)
+        b = pow(self.data.shape[1]*self.spacing[1], 2)
+        return np.sqrt(a + b)
+
     def set_spacing(self, spacing):
         self.spacing = spacing
 
