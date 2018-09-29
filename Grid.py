@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#todo: breite von detector
 
 class Grid:
 
@@ -9,6 +10,10 @@ class Grid:
             self.data = data
         else:
             self.data = np.array(data)
+
+        if self.data.ndim == 1:
+            self.data = self.data.reshape(1, self.data.shape[0])
+
         self.dim = data.ndim
         self.origin_pixel = (0,) * data.ndim
         self.spacing = spacing
@@ -67,6 +72,24 @@ class Grid:
             return (y2 - p[1])*f1 + (p[1] - y1)*f2
         else:
             return f1
+
+    def set_point(self, world_cords, value):
+        p = self.world_to_pixel(world_cords)
+        self.data[p[0], p[1]] = value
+
+    def add_to_point(self, world_cords, value):
+        p_x, p_y = self.world_to_pixel(world_cords)
+        p_x = int(np.floor(p_x))
+        p_y = int(np.floor(p_y))
+        #todo: problem p is float 9.5, 9.5
+
+        if p_x < 0 or p_y < 0:
+            return
+        if p_x >  (self.data.shape[0] - 1) or p_y > (self.data.shape[1] - 1):
+            return 
+
+        self.data[p_x][p_y] = value
+
 
     def show_img(self):
         plt.subplot(111)
