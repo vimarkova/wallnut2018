@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-#todo: breite von detector
 
 class Grid:
 
@@ -73,24 +72,7 @@ class Grid:
         else:
             return f1
 
-    def set_point(self, world_cords, value):
-        p = self.world_to_pixel(world_cords)
-        self.data[p[0], p[1]] = value
-
-    def add_to_point(self, world_cords, value):
-        p_x, p_y = self.world_to_pixel(world_cords)
-        p_x = int(np.floor(p_x))
-        p_y = int(np.floor(p_y))
-        #todo: problem p is float 9.5, 9.5
-
-        if p_x < 0 or p_y < 0:
-            return
-        if p_x >  (self.data.shape[0] - 1) or p_y > (self.data.shape[1] - 1):
-            return 
-
-        self.data[p_x][p_y] = value
-
-
+    #todo: there is a problem here. It is not indepotent as it should be
     def show_img(self):
         plt.subplot(111)
         plt.imshow(np.abs(self.data), cmap='gray')

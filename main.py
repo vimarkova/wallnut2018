@@ -12,6 +12,12 @@ angle_step = 1
 line_stepping = 1
 spacing = 1
 
+def show_img(data):
+    plt.figure()
+    #plt.subplot(111)
+    plt.imshow(np.abs(data), cmap='gray')
+    plt.show()
+
 # image -> Grid
 def forward_projection(image):
     count_angles = int(180 / angle_step)
@@ -43,22 +49,53 @@ def forward_projection(image):
     return measurement
 
 
-def get_sinogram(name_of_pic, mine=True, show_img=True):
+def get_sinogram(name_of_pic, mine=True):
     img = mpimg.imread('./data/' + name_of_pic)
     img = np.dot(img[..., :3], [0.33, 0.33, 0.33])
     img = resize(img,(20, 20), mode='reflect', anti_aliasing=False)
     image_in_grid = Grid(img, (spacing, spacing))
-    if show_img:
-        image_in_grid.show_img()
+
     if mine:
         sinogram = forward_projection(image_in_grid)
     else:
         sinogram = skimage.transform.radon(img)
-    sinogram_placeholder = Grid(sinogram, 1)
-    sinogram_placeholder.show_img()
+    #sinogram_placeholder = Grid(sinogram, 1)
+    #sinogram_placeholder.show_img()
     return sinogram
 
+
+def ramp_filter(width):
+
+    pass
+
+
+def filter_sinogram(sinogram):
+    f_space = np.fft.fft2(sinogram, axes=[0])
+    #f_space = np.fft.fftshift(f_space, axes=[0])
+    r = sinogram.shape[0] // 2
+    to_add = int(np.ceil(sinogram.shape[0] / 2)) - r
+
+    for x in range(-r, r+to_add):
+        #print(x/14)
+        f_space[x, :] = (abs(x))*f_space[x, :]
+
+    #f_space[15, :] = 0#abs(0)*f_space[15, :]
+
+    #f_space = np.fft.ifftshift(f_space, axes=[0])
+    return np.fft.ifft2(f_space, axes=[0])
+
+
+def filter_ray(ray):
+    fourirer_space = np.fft.rfft(ray)
+    r = int(np.floor(ray.shape[0] / 2))
+    for x in range(-r, r):
+        fourirer_space[x] = abs(x)*fourirer_space[x]
+    return np.fft.ifft(fourirer_space)
+
+
 def back_projection(sinogram):
+    sinogram = filter_sinogram(sinogram).real
+
     reconstruction = Grid(np.ndarray(shape=(20, 20), dtype=float), (1,1))
 
     for angle_number in range(sinogram.shape[1]):
@@ -74,16 +111,23 @@ def back_projection(sinogram):
             scalar_product = np.dot(unit_vector, vec)
             reconstruction.data[pixel_x][pixel_y] += detector.intensity((0, scalar_product))
 
-    reconstruction.show_img()
+    #reconstruction.show_img()
+    plt.imshow(reconstruction.data,cmap='gray')
+    plt.show()
+    #show_img(reconstruction.data)
     return reconstruction
 
-    pass
 
 
 if __name__ == '__main__':
     #back_projection(np.ndarray(shape=(2,2)))
-    sinogram = get_sinogram('circle.png', mine=True, show_img=False)
+    sinogram = get_sinogram('circle.png', mine=False)
+
+    #reconstruction = skimage.transform.iradon(sinogram)
+    #show_img(reconstruction)
     back_projection(sinogram)
+
     print("done")
+    exit()
 
 
